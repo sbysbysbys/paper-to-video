@@ -34,6 +34,7 @@ Use this skill when the user provides an academic paper and wants a narrated exp
    - Save the deck under `WORKDIR/slides/`.
 5. Create narration scripts:
    - Generate one Chinese narration text file per slide under `WORKDIR/audio/scripts/`.
+   - Each script must be a paragraph-style spoken manuscript with no markdown headings, no bullet lists, no numbered outline, and no slide-title prefix.
    - Each script must explain the corresponding slide, not merely read bullet points.
    - Keep slide and script counts identical.
 6. Generate audio:
@@ -49,17 +50,20 @@ Use this skill when the user provides an academic paper and wants a narrated exp
 
 The PPT is a professional technical lecture deck. It is not a decorative summary deck.
 
-- Target about 5 content slides. Expand only when the paper's actual structure requires it.
+- Target a compact but content-complete technical lecture deck. About 5 content slides is acceptable only for short/simple papers; expand the deck when needed to preserve the paper's introduction and method details.
 - Give the introduction and motivation substantial space.
-- Give the method section the largest or near-largest portion of the deck.
+- Present the paper strictly in the order it is written: title/abstract framing, introduction and motivation, related work only if needed for the paper's argument, methodology in paper order, experiments, conclusion.
+- Give the method section the largest portion of the deck. The PPT should reflect roughly 70% of the paper's methodology content, including formulas, definitions, intermediate variables, algorithmic steps, losses, training objectives, and submodule details that the paper actually discusses.
 - Keep experiments concise: usually 1 slide, at most 2 slides, unless the paper itself is mainly an empirical benchmark paper.
 - Follow the paper's own structure, wording, terminology, and explanation order.
 - Do not impose a generic method template. Do not force topics such as architecture, loss, training, inference, modules, or theory unless they are actually present in the paper.
 - Use text explanation as the main presentation mode.
-- Include important equations when the paper relies on them.
+- Include important equations, symbols, and variable definitions when the paper relies on them. Do not reduce formulas to vague prose if the formula is central to the method.
 - Use only figures, tables, equations, and claims from the paper.
 - Do not create new diagrams, decorative visuals, synthetic illustrations, or paper-external figures.
 - Prefer original paper figures that support introduction, problem setup, method explanation, or key results.
+- Figures and tables must be visually useful: crop complete original figures/tables from the paper page when embedded extraction fragments are incomplete; preserve captions or enough context to identify the asset; avoid cutting off labels, legends, axes, formula lines, or subfigure markers; allocate enough slide area for the main figure to be readable.
+- Do not place a main method figure as a small thumbnail. If a slide relies on a figure, the figure should normally occupy 40-65% of the slide area, with surrounding text arranged to explain it.
 - Keep visual style restrained, academic, clean, and readable.
 
 ## Prompt Requirements For LLM Calls
@@ -73,13 +77,19 @@ Follow the paper's own structure and terminology. Do not impose a generic method
 
 Allocate substantial space to the introduction and motivation. Explain the background, problem setup, motivation, and research gap according to the paper's own presentation.
 
-Allocate the largest or near-largest portion of the deck to the method section, but organize it according to the paper itself. Explain the method carefully and technically. Include key equations when they are central to the paper.
+Present the paper strictly in the order it is written. Do not reorder the explanation around a generic template. The audience should be able to reconstruct the paper's main line of reasoning from the deck alone.
+
+Allocate the largest portion of the deck to the method section, but organize it according to the paper itself. The deck should reflect roughly 70% of the methodology content from the paper. Include the paper's actual formulas, definitions, intermediate variables, algorithmic steps, losses, training objectives, and submodule details when they appear in the method. Do not replace central equations with vague prose.
 
 Keep experiments concise: usually 1 slide and at most 2 slides, unless the paper itself is primarily an empirical benchmark paper.
 
 Use only the paper's original figures, tables, equations, and claims. Do not invent diagrams, decorative graphics, synthetic figures, or content not supported by the paper.
 
-The deck should be about 5 content slides by default. Use a restrained academic style, text-first layout, readable typography, and clear slide titles.
+Images and tables must be complete and readable. If extracted embedded images are fragmented or incomplete, crop the complete original figure/table from the rendered PDF page. Do not cut off labels, legends, axes, subfigure markers, captions, or important surrounding context. Main figures should be large enough to read; if a method slide depends on a figure, allocate roughly 40-65% of the slide to that figure and arrange text around it.
+
+Use a restrained academic style, text-first layout, readable typography, and clear slide titles. Expand beyond 5 slides when necessary to preserve introduction and method detail.
+
+Narration scripts must be plain Chinese spoken paragraphs. Do not output markdown, bullet lists, numbered outlines, section headers, or slide-title prefixes in narration files.
 ```
 
 ## Expected Outputs
@@ -107,7 +117,10 @@ The deck should be about 5 content slides by default. Use a restrained academic 
 
 - Every slide must be grounded in the paper.
 - Introduction must not be reduced to a token title slide.
-- Method content must be detailed, but must follow the paper rather than a fixed template.
+- Slide sequence must follow the paper's original explanation order.
+- Method content must be detailed, must cover roughly 70% of the paper's methodology, and must follow the paper rather than a fixed template.
 - Experiments must not dominate the deck.
 - All included figures/tables must come from extraction output or the original PDF.
+- Main paper figures/tables must be complete, readable, and given sufficient visual area; reject cropped-off or thumbnail-sized main figures.
+- Narration scripts must be paragraph-style manuscripts with no headings or bullet structure.
 - Slide count, narration script count, and audio count must match before video assembly.

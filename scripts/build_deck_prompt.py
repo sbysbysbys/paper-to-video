@@ -37,20 +37,27 @@ Follow the paper's own structure and terminology. Do not impose a generic method
 
 Allocate substantial space to the introduction and motivation. Explain the background, problem setup, motivation, and research gap according to the paper's own presentation.
 
-Allocate the largest or near-largest portion of the deck to the method section, but organize it according to the paper itself. Explain the method carefully and technically. Include key equations when they are central to the paper.
+Present the paper strictly in the order it is written. Do not reorder the explanation around a generic template. The audience should be able to reconstruct the paper's main line of reasoning from the deck alone.
+
+Allocate the largest portion of the deck to the method section, but organize it according to the paper itself. The deck should reflect roughly 70% of the methodology content from the paper. Include the paper's actual formulas, definitions, intermediate variables, algorithmic steps, losses, training objectives, and submodule details when they appear in the method. Do not replace central equations with vague prose.
 
 Keep experiments concise: usually 1 slide and at most 2 slides, unless the paper itself is primarily an empirical benchmark paper.
 
 Use only the paper's original figures, tables, equations, and claims. Do not invent diagrams, decorative graphics, synthetic figures, or content not supported by the paper.
 
-The deck should be about 5 content slides by default. Use a restrained academic style, text-first layout, readable typography, and clear slide titles.
+Images and tables must be complete and readable. If extracted embedded images are fragmented or incomplete, crop the complete original figure/table from the rendered PDF page. Do not cut off labels, legends, axes, subfigure markers, captions, or important surrounding context. Main figures should be large enough to read; if a method slide depends on a figure, allocate roughly 40-65% of the slide to that figure and arrange text around it.
+
+Use a restrained academic style, text-first layout, readable typography, and clear slide titles. Expand beyond 5 slides when necessary to preserve introduction and method detail.
+
+Narration scripts must be plain Chinese spoken paragraphs. Do not output markdown, bullet lists, numbered outlines, section headers, or slide-title prefixes in narration files.
 
 Return a slide plan that includes:
 - slide title
 - slide objective
-- concise but technical Chinese slide text
+- detailed technical Chinese slide text that follows the paper order
 - original paper assets to place on the slide, using asset ids and paths below
 - equations to include when important
+- explicit notes about complete figure/table crop requirements and desired visual proportion
 - narration intent for the later voiceover script
 
 Available extracted paper assets:
