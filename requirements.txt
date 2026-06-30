@@ -1,2 +1,4 @@
 pymupdf>=1.24
 pdfplumber>=0.11
+moviepy>=2.0
+imageio-ffmpeg>=0.5

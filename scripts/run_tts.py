@@ -23,26 +23,29 @@ def load_env_file(path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate one audio file per slide script with a configurable TTS command.")
+    parser = argparse.ArgumentParser(description="Generate one audio file per slide script.")
     parser.add_argument("--scripts", required=True, help="Directory containing slide_001.txt, slide_002.txt, etc.")
     parser.add_argument("--out", required=True, help="Output audio directory.")
     parser.add_argument("--manifest", required=True, help="Output audio manifest JSON.")
     parser.add_argument(
         "--command-template",
         default=None,
-        help="Command template. Use {text} and {output} placeholders. Defaults to PAPER_TO_VIDEO_TTS_COMMAND.",
+        help=(
+            "Command template. Use {text} and {output} placeholders. "
+            "Defaults to PAPER_TO_VIDEO_TTS_COMMAND, then bundled MiniMax TTS."
+        ),
     )
-    parser.add_argument("--env-file", default=".env", help="Optional env file that can define PAPER_TO_VIDEO_TTS_COMMAND.")
+    parser.add_argument("--env-file", default=".env", help="Optional env file for TTS settings such as MINIMAX_API_KEY.")
     parser.add_argument("--ext", default="mp3", help="Audio extension produced by TTS command.")
     args = parser.parse_args()
 
     load_env_file(Path(args.env_file))
     command_template = args.command_template or os.environ.get("PAPER_TO_VIDEO_TTS_COMMAND")
     if not command_template:
-        fail(
-            "provide --command-template or set PAPER_TO_VIDEO_TTS_COMMAND. "
-            "Template must contain {text} and {output} placeholders."
-        )
+        minimax_script = Path(__file__).resolve().parent / "minimax_tts.py"
+        command_template = f"python3 {shlex.quote(str(minimax_script))} --env-file {shlex.quote(str(Path(args.env_file).resolve()))} --text-file {{text}} --output {{output}}"
+    if not command_template:
+        fail("provide --command-template or set PAPER_TO_VIDEO_TTS_COMMAND")
     if "{text}" not in command_template or "{output}" not in command_template:
         fail("TTS command template must contain both {text} and {output} placeholders")
 

@@ -1,6 +1,6 @@
 ---
 name: paper-to-video
-description: Convert an academic paper PDF into a professional Chinese lecture video by extracting paper text, figures, tables, and equations; generating a restrained technical PPT with the presentations skill; creating per-slide narration scripts; running a reusable TTS command; and assembling the final video.
+description: Convert an academic paper PDF into a professional Chinese lecture video by extracting paper text, figures, tables, and equations; generating a restrained technical PPT with the presentations skill; creating per-slide narration scripts; generating MiniMax narration audio by default; and assembling the final video.
 ---
 
 # Paper To Video
@@ -11,7 +11,7 @@ Use this skill when the user provides an academic paper and wants a narrated exp
 
 - Use `pdf:pdf` when PDF inspection, rendering, or visual extraction needs verification.
 - Use `presentations:Presentations` to create the PowerPoint deck.
-- Use the local TTS adapter or user-provided TTS command to generate narration audio.
+- Use bundled MiniMax TTS by default, or a user-provided TTS command when explicitly requested.
 
 ## Workflow
 
@@ -38,10 +38,10 @@ Use this skill when the user provides an academic paper and wants a narrated exp
    - Each script must explain the corresponding slide, not merely read bullet points.
    - Keep slide and script counts identical.
 6. Generate audio:
-   - Run `scripts/run_tts.py` with `--command-template` or `PAPER_TO_VIDEO_TTS_COMMAND`.
-   - The command must contain `{text}` and `{output}` placeholders.
-   - MiniMax example:
-     `PAPER_TO_VIDEO_TTS_COMMAND='python3 /path/to/minimax_voice.py tts --text-file {text} --output {output}'`
+   - Run `scripts/run_tts.py`. By default it uses `scripts/minimax_tts.py` with the bundled defaults `voice_id=biebi_voice` and `model=speech-2.8-hd`.
+   - Do not hardcode or store a MiniMax API key in the skill or generated artifacts.
+   - At the start of a run, ensure the user provides `MINIMAX_API_KEY` through the environment, `.env`, or the script's interactive prompt.
+   - If the user explicitly wants another TTS provider, pass `--command-template` or `PAPER_TO_VIDEO_TTS_COMMAND`; the command must contain `{text}` and `{output}` placeholders.
 7. Export each slide as an image and assemble video:
    - Export slide images to `WORKDIR/slides/images/slide_001.png`, etc.
    - Run `scripts/assemble_video.py --slides WORKDIR/slides/images --audio WORKDIR/audio/audio_manifest.json --out WORKDIR/video/final.mp4`.
@@ -106,12 +106,12 @@ Narration scripts must be plain Chinese spoken paragraphs. Do not output markdow
 ## Portability Requirements
 
 - Install Python dependencies from `requirements.txt`.
-- Install `ffmpeg` for video assembly.
-- Configure a TTS command before audio generation:
-  - CLI: `--command-template 'your_tts --text-file {text} --output {output}'`
-  - Environment: `PAPER_TO_VIDEO_TTS_COMMAND='your_tts --text-file {text} --output {output}'`
-- Do not assume a project-local `_audio/` directory exists. Treat MiniMax, OpenAI TTS, Azure, local models, or any other TTS tool as replaceable adapters.
-- The TTS command must write exactly one audio file to `{output}` for each `{text}` input.
+- Do not require users to install system `ffmpeg` for normal use. `scripts/assemble_video.py` first uses Python dependencies from `requirements.txt` (`moviepy` and `imageio-ffmpeg`) to write MP4; system `ffmpeg` is only a fallback.
+- The default TTS provider is bundled MiniMax. Required runtime secret: `MINIMAX_API_KEY`.
+- Optional MiniMax environment variables: `MINIMAX_GROUP_ID`, `MINIMAX_API_BASE`, `MINIMAX_MODEL`, `MINIMAX_VOICE_ID`.
+- Default MiniMax voice settings are intentionally embedded: `voice_id=biebi_voice`, `model=speech-2.8-hd`, MP3 output, 32 kHz, 128 kbps, mono.
+- Do not assume a project-local `_audio/` directory exists.
+- If a custom TTS command is used, it must write exactly one audio file to `{output}` for each `{text}` input.
 
 ## Quality Checks
 
