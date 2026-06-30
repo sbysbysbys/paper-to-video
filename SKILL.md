@@ -29,20 +29,25 @@ Use this skill when the user provides an academic paper and wants a narrated exp
 3. Prepare the deck-generation prompt:
    - Run `scripts/build_deck_prompt.py --extracted WORKDIR/extracted --out WORKDIR/analysis/deck_prompt.txt`.
    - Give `deck_prompt.txt`, extracted assets, and the original PDF to `presentations:Presentations`.
-4. Generate the PPTX with `presentations:Presentations`.
+4. Plan narration before final slide construction:
+   - First create `WORKDIR/analysis/narration_plan.json` or equivalent structured notes from the paper.
+   - The plan must define slide order, per-slide objective, paragraph-style Chinese narration draft, paper sections covered, equations, symbols, and original figure/table assets.
+   - Build the PPT from the paper plus this narration plan, so most spoken content is visibly supported on the corresponding slide.
+5. Generate the PPTX with `presentations:Presentations`.
    - Follow the Deck Policy below exactly.
    - Save the deck under `WORKDIR/slides/`.
-5. Create narration scripts:
+6. Create narration scripts:
    - Generate one Chinese narration text file per slide under `WORKDIR/audio/scripts/`.
    - Each script must be a paragraph-style spoken manuscript with no markdown headings, no bullet lists, no numbered outline, and no slide-title prefix.
    - Each script must explain the corresponding slide, not merely read bullet points.
+   - Do not add major technical points in narration that are absent from the slide.
    - Keep slide and script counts identical.
-6. Generate audio:
+7. Generate audio:
    - Run `scripts/run_tts.py`. By default it uses `scripts/minimax_tts.py` with the bundled defaults `voice_id=biebi_voice` and `model=speech-2.8-hd`.
    - Do not hardcode or store a MiniMax API key in the skill or generated artifacts.
    - At the start of a run, ensure the user provides `MINIMAX_API_KEY` through the environment, `.env`, or the script's interactive prompt.
    - If the user explicitly wants another TTS provider, pass `--command-template` or `PAPER_TO_VIDEO_TTS_COMMAND`; the command must contain `{text}` and `{output}` placeholders.
-7. Export each slide as an image and assemble video:
+8. Export each slide as an image and assemble video:
    - Export slide images to `WORKDIR/slides/images/slide_001.png`, etc.
    - Run `scripts/assemble_video.py --slides WORKDIR/slides/images --audio WORKDIR/audio/audio_manifest.json --out WORKDIR/video/final.mp4`.
 
@@ -51,18 +56,21 @@ Use this skill when the user provides an academic paper and wants a narrated exp
 The PPT is a professional technical lecture deck. It is not a decorative summary deck.
 
 - Target a compact but content-complete technical lecture deck. About 5 content slides is acceptable only for short/simple papers; expand the deck when needed to preserve the paper's introduction and method details.
+- Do not compress a technical paper into a thin summary deck. If the narration or method requires more space, increase slide count instead of shrinking text, formulas, or figures.
 - Give the introduction and motivation substantial space.
 - Present the paper strictly in the order it is written: title/abstract framing, introduction and motivation, related work only if needed for the paper's argument, methodology in paper order, experiments, conclusion.
-- Give the method section the largest portion of the deck. The PPT should reflect roughly 70% of the paper's methodology content, including formulas, definitions, intermediate variables, algorithmic steps, losses, training objectives, and submodule details that the paper actually discusses.
+- Give the method section the largest portion of the deck. The PPT should reflect almost all important method content and at least roughly 70% of the paper's methodology details, including formulas, definitions, intermediate variables, algorithmic steps, losses, training objectives, and submodule details that the paper actually discusses.
+- Make PPT and narration tightly aligned. For each slide, most narration claims should be visible on the slide as text, equations, symbols, or paper assets. The narration may connect ideas verbally, but it must not become the primary place where method details live.
 - Keep experiments concise: usually 1 slide, at most 2 slides, unless the paper itself is mainly an empirical benchmark paper.
 - Follow the paper's own structure, wording, terminology, and explanation order.
 - Do not impose a generic method template. Do not force topics such as architecture, loss, training, inference, modules, or theory unless they are actually present in the paper.
 - Use text explanation as the main presentation mode.
 - Include important equations, symbols, and variable definitions when the paper relies on them. Do not reduce formulas to vague prose if the formula is central to the method.
+- Render formulas professionally. Use compiled math/equation rendering, PowerPoint equation objects, or high-resolution crops from the paper. Do not paste raw, uncompiled LaTeX strings as ordinary slide text. Preserve Greek letters, superscripts/subscripts, hats, bars, calligraphic symbols, arrows, norms, expectations, summations, and equation numbers when they matter.
 - Use only figures, tables, equations, and claims from the paper.
 - Do not create new diagrams, decorative visuals, synthetic illustrations, or paper-external figures.
 - Prefer original paper figures that support introduction, problem setup, method explanation, or key results.
-- Figures and tables must be visually useful: crop complete original figures/tables from the paper page when embedded extraction fragments are incomplete; preserve captions or enough context to identify the asset; avoid cutting off labels, legends, axes, formula lines, or subfigure markers; allocate enough slide area for the main figure to be readable.
+- Figures and tables must be visually useful: crop complete original figures/tables from the paper page when embedded extraction fragments are incomplete; include the figure/table title or caption line such as "Figure 2: ..." or "Table 1: ..." whenever it appears near the asset; avoid cutting off labels, legends, axes, formula lines, subfigure markers, or caption/title text; allocate enough slide area for the main figure to be readable.
 - Do not place a main method figure as a small thumbnail. If a slide relies on a figure, the figure should normally occupy 40-65% of the slide area, with surrounding text arranged to explain it.
 - Keep visual style restrained, academic, clean, and readable.
 
@@ -81,11 +89,17 @@ Present the paper strictly in the order it is written. Do not reorder the explan
 
 Allocate the largest portion of the deck to the method section, but organize it according to the paper itself. The deck should reflect roughly 70% of the methodology content from the paper. Include the paper's actual formulas, definitions, intermediate variables, algorithmic steps, losses, training objectives, and submodule details when they appear in the method. Do not replace central equations with vague prose.
 
+Plan the narration before finalizing slides. First produce a slide-by-slide lecture plan with a paragraph-style Chinese narration draft for each slide, then build the PPT from the original paper and that narration plan. The PPT must support most of the narration on the same slide. Do not put important method details only in the spoken script.
+
+Do not shrink the method into a high-level summary. The PPT should contain almost all important method content and at least roughly 70% of method details. Increase the number of method slides when needed.
+
 Keep experiments concise: usually 1 slide and at most 2 slides, unless the paper itself is primarily an empirical benchmark paper.
 
 Use only the paper's original figures, tables, equations, and claims. Do not invent diagrams, decorative graphics, synthetic figures, or content not supported by the paper.
 
-Images and tables must be complete and readable. If extracted embedded images are fragmented or incomplete, crop the complete original figure/table from the rendered PDF page. Do not cut off labels, legends, axes, subfigure markers, captions, or important surrounding context. Main figures should be large enough to read; if a method slide depends on a figure, allocate roughly 40-65% of the slide to that figure and arrange text around it.
+Render formulas professionally. Use compiled math/equation rendering, PowerPoint equation objects, or high-resolution crops from the paper. Do not paste raw, uncompiled LaTeX strings as ordinary slide text. Preserve symbols, superscripts/subscripts, equation numbers, and variable definitions.
+
+Images and tables must be complete and readable. If extracted embedded images are fragmented or incomplete, crop the complete original figure/table from the rendered PDF page. Include the figure/table title or caption line such as "Figure 2: ..." or "Table 1: ..." whenever it appears near the asset. Do not cut off labels, legends, axes, subfigure markers, captions, titles, or important surrounding context. Main figures should be large enough to read; if a method slide depends on a figure, allocate roughly 40-65% of the slide to that figure and arrange text around it.
 
 Use a restrained academic style, text-first layout, readable typography, and clear slide titles. Expand beyond 5 slides when necessary to preserve introduction and method detail.
 
@@ -98,6 +112,7 @@ Narration scripts must be plain Chinese spoken paragraphs. Do not output markdow
 - `extracted/pages.json`
 - `extracted/assets_manifest.json`
 - `analysis/deck_prompt.txt`
+- `analysis/narration_plan.json` or equivalent slide-by-slide narration plan
 - `slides/*.pptx`
 - `audio/scripts/slide_001.txt`, etc.
 - `audio/audio_manifest.json`
@@ -119,8 +134,10 @@ Narration scripts must be plain Chinese spoken paragraphs. Do not output markdow
 - Introduction must not be reduced to a token title slide.
 - Slide sequence must follow the paper's original explanation order.
 - Method content must be detailed, must cover roughly 70% of the paper's methodology, and must follow the paper rather than a fixed template.
+- Most narration content must be present on the corresponding slide; reject slides that are only sparse headings while the narration carries the real explanation.
+- Important equations must be rendered/compiled or cropped from the paper, not left as raw LaTeX text.
 - Experiments must not dominate the deck.
 - All included figures/tables must come from extraction output or the original PDF.
-- Main paper figures/tables must be complete, readable, and given sufficient visual area; reject cropped-off or thumbnail-sized main figures.
+- Main paper figures/tables must be complete, readable, include nearby title/caption text when present, and be given sufficient visual area; reject cropped-off or thumbnail-sized main figures.
 - Narration scripts must be paragraph-style manuscripts with no headings or bullet structure.
 - Slide count, narration script count, and audio count must match before video assembly.
