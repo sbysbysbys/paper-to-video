@@ -37,9 +37,10 @@ Use this skill when the user provides an academic paper and wants a narrated exp
    - Each script must explain the corresponding slide, not merely read bullet points.
    - Keep slide and script counts identical.
 6. Generate audio:
-   - Run `scripts/run_tts.py` with a command template.
-   - Default project example:
-     `python3 _audio/minimax_voice.py tts --text-file {text} --output {output}`
+   - Run `scripts/run_tts.py` with `--command-template` or `PAPER_TO_VIDEO_TTS_COMMAND`.
+   - The command must contain `{text}` and `{output}` placeholders.
+   - MiniMax example:
+     `PAPER_TO_VIDEO_TTS_COMMAND='python3 /path/to/minimax_voice.py tts --text-file {text} --output {output}'`
 7. Export each slide as an image and assemble video:
    - Export slide images to `WORKDIR/slides/images/slide_001.png`, etc.
    - Run `scripts/assemble_video.py --slides WORKDIR/slides/images --audio WORKDIR/audio/audio_manifest.json --out WORKDIR/video/final.mp4`.
@@ -91,6 +92,16 @@ The deck should be about 5 content slides by default. Use a restrained academic 
 - `audio/scripts/slide_001.txt`, etc.
 - `audio/audio_manifest.json`
 - `video/final.mp4`
+
+## Portability Requirements
+
+- Install Python dependencies from `requirements.txt`.
+- Install `ffmpeg` for video assembly.
+- Configure a TTS command before audio generation:
+  - CLI: `--command-template 'your_tts --text-file {text} --output {output}'`
+  - Environment: `PAPER_TO_VIDEO_TTS_COMMAND='your_tts --text-file {text} --output {output}'`
+- Do not assume a project-local `_audio/` directory exists. Treat MiniMax, OpenAI TTS, Azure, local models, or any other TTS tool as replaceable adapters.
+- The TTS command must write exactly one audio file to `{output}` for each `{text}` input.
 
 ## Quality Checks
 
